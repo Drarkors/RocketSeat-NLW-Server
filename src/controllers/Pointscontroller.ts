@@ -5,16 +5,37 @@ class PointsController {
     async index(request: Request, response: Response) {
         //cidade, uf, items (Query Params)
         const { city, uf, items } = request.query;
-        
-        const parsedItems = String(items).split(',').map(items => Number(items.trim()))
-        
-        const points = await knex('points')
-        .join('point_items', 'points.id', '=', 'point_items.point_id')
-        .whereIn('point_items.item_id', parsedItems)
-        .where('city', 'like', String(city))
-        .where('uf', 'like', String(uf))
-        .distinct()
-        .select('points.*');
+
+        console.log(city);
+        console.log(uf);
+        console.log(items);
+
+        const parsedItems = items !== undefined ?  String(items).split(',').map(items => Number(items.trim())) : [];
+
+        // const points = await knex('points')
+        // .join('point_items', 'points.id', '=', 'point_items.point_id')
+        // .whereIn('point_items.item_id', parsedItems)
+        // .where('city', 'like', String(city))
+        // .where('uf', 'like', String(uf))
+        // .distinct()
+        // .select('points.*')
+
+        var points;
+        parsedItems.length > 0 ?
+            points = await knex('points')
+                .join('point_items', 'points.id', '=', 'point_items.point_id')
+                .whereIn('point_items.item_id', parsedItems)
+                .where('city', 'like', String(city))
+                .where('uf', 'like', String(uf))
+                .distinct()
+                .select('points.*')
+            :
+            points = await knex('points')
+                .join('point_items', 'points.id', '=', 'point_items.point_id')
+                .where('points.city', String(city))
+                .where('points.uf', String(uf))
+                .distinct()
+                .select('points.*');
 
         return response.json(points);
     }
